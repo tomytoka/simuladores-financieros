@@ -2,7 +2,7 @@ import streamlit as st
 import requests
 
 # Configuración de página (NOMBRE DE TU PROYECTO)
-st.set_page_config(page_title="My Finance Lab", page_icon="📊", layout="wide")
+st.set_page_config(page_title="Herramientas Finanieras", page_icon="📊", layout="wide")
 
 # Estilo personalizado para las tarjetas (CSS)
 st.markdown("""
@@ -20,7 +20,7 @@ st.markdown("""
     </style>
     """, unsafe_allow_html=True)
 
-st.title("🚀 Finance Lab")
+st.title("Herramientas Financieras")
 st.write("Herramientas interactivas para análisis financiero y toma de decisiones.")
 
 # --- FUNCIÓN PARA OBTENER DÓLAR ---
@@ -41,7 +41,7 @@ datos_dolar = obtener_dolares()
 
 # --- SECCIÓN 1: COTIZACIONES ---
 if opcion == "Cotizaciones en Tiempo Real":
-    st.header("💵 Cotizaciones Actuales (Argentina)")
+    st.header("Cotizacion Dolar")
     st.write("Datos en tiempo real extraídos de DolarApi.")
 
     if datos_dolar:
