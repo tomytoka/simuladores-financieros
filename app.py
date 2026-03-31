@@ -1,172 +1,185 @@
 import streamlit as st
 import requests
 
-# 1. Configuración de página
+# 1. CONFIGURACIÓN (Debe estar al principio)
 st.set_page_config(page_title="Finance Lab", layout="wide")
 
-# 2. CSS "THE FORCE": Forzamos a Streamlit a verse como Mode
-st.markdown("""
+# 2. LÓGICA DE NAVEGACIÓN (Usando query_params para que parezca una web real)
+# Si no hay nada seleccionado, por defecto vamos a 'Intelligence'
+if "choice" not in st.session_state:
+    st.session_state.choice = "Intelligence"
+
+# Función para cambiar de pestaña
+def set_choice(name):
+    st.session_state.choice = name
+
+# 3. CSS "MODE" DEFINITIVO (Navbar Real + Estética)
+st.markdown(f"""
     <style>
     @import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;700&family=Fraunces:opsz,wght@9,900&display=swap');
 
     /* Fondo de la App */
-    .stApp {
+    .stApp {{
         background-color: #0b1a14;
-    }
+    }}
 
-    /* NAVBAR FIJA SUPERIOR */
-    .header-container {
+    /* NAVBAR SUPERIOR REAL */
+    .nav-wrapper {{
         position: fixed;
         top: 0;
         left: 0;
         right: 0;
-        height: 80px;
-        background-color: #f2f7f0; /* El color crema de Mode */
+        height: 75px;
+        background-color: #f2f7f0;
         display: flex;
         align-items: center;
         justify-content: space-between;
         padding: 0 50px;
-        z-index: 99;
+        z-index: 1000;
         border-bottom: 1px solid #d1d6d0;
-    }
+    }}
 
-    .logo {
+    .logo {{
         font-family: 'Fraunces', serif;
         font-weight: 900;
         font-size: 1.8rem;
         color: #0b1a14;
-    }
+        flex: 1;
+    }}
 
-    .signature {
+    .nav-items {{
+        display: flex;
+        gap: 40px;
+        flex: 2;
+        justify-content: center;
+    }}
+
+    .nav-item {{
+        font-family: 'Space Grotesk', sans-serif;
+        font-weight: 700;
+        font-size: 0.9rem;
+        color: #0b1a14;
+        text-transform: uppercase;
+        text-decoration: none;
+        cursor: pointer;
+        padding-bottom: 5px;
+    }}
+
+    .signature-box {{
+        flex: 1;
+        text-align: right;
         font-family: 'Space Grotesk', sans-serif;
         font-weight: 700;
         font-size: 0.7rem;
         color: #0b1a14;
         letter-spacing: 1px;
-    }
+    }}
 
-    /* POSICIONAR EL MENÚ DENTRO DE LA NAVBAR */
-    div[data-testid="stHorizontalRadiogroup"] {
-        position: fixed !important;
-        top: 25px !important;
-        left: 50% !important;
-        transform: translateX(-50%) !important;
-        z-index: 100 !important;
-        background-color: transparent !important;
-        gap: 30px !important;
-    }
+    /* CONTENIDO */
+    .main-content {{
+        margin-top: 120px;
+        text-align: center;
+    }}
 
-    /* OCULTAR LOS CÍRCULOS (EL HACK DEFINITIVO) */
-    /* Este selector busca específicamente el círculo y lo elimina */
-    div[data-testid="stHorizontalRadiogroup"] label div[role="presentation"] {
-        display: none !important;
-    }
-    
-    /* Estilo de los textos del menú */
-    div[data-testid="stHorizontalRadiogroup"] label div[data-testid="stMarkdownContainer"] p {
-        font-family: 'Space Grotesk', sans-serif !important;
-        font-weight: 700 !important;
-        color: #0b1a14 !important;
-        font-size: 0.9rem !important;
-        text-transform: uppercase;
-        margin: 0 !important;
-        cursor: pointer;
-    }
-
-    /* Indicador de selección (Subrayado negro) */
-    div[data-testid="stHorizontalRadiogroup"] label[data-checked="true"] {
-        border-bottom: 2px solid #0b1a14 !important;
-        padding-bottom: 5px !important;
-    }
-
-    /* CONTENIDO PRINCIPAL */
-    .main-content {
-        margin-top: 130px;
-        padding: 0 20px;
-    }
-
-    h1 {
+    h1 {{
         font-family: 'Fraunces', serif !important;
         font-weight: 900 !important;
         color: #c1ff72 !important;
-        font-size: 4.5rem !important;
+        font-size: 5rem !important;
         line-height: 0.9 !important;
-        text-align: center;
-        margin-bottom: 50px !important;
-    }
+        margin-bottom: 40px !important;
+    }}
 
-    /* Dolar Cards */
-    .dolar-card {
+    /* Cards de Dólares */
+    .dolar-card {{
         background-color: #122b22;
         border: 1px solid #1a3d31;
         padding: 25px;
         border-radius: 4px;
-        transition: all 0.2s ease;
-    }
-    .dolar-card:hover { border-color: #c1ff72; transform: translateY(-3px); }
-    .dolar-nombre { font-family: 'Space Grotesk', sans-serif; color: #8fa391; font-size: 0.7rem; text-transform: uppercase; letter-spacing: 1px; }
-    .price-val { font-family: 'Space Grotesk', sans-serif; font-size: 2rem; font-weight: 700; color: #ffffff; }
+        text-align: left;
+    }}
+    .dolar-card:hover {{ border-color: #c1ff72; }}
+    .price-val {{ font-family: 'Space Grotesk', sans-serif; font-size: 2rem; font-weight: 700; color: #ffffff; }}
 
-    /* Estilo de inputs */
-    .stNumberInput, .stSlider { 
-        background-color: #122b22 !important; 
-        border: 1px solid #1a3d31 !important; 
-        border-radius: 4px !important; 
-    }
-
-    /* Esconder Sidebar y Header de Streamlit */
-    [data-testid="stSidebar"] { display: none; }
-    header, footer { visibility: hidden; }
+    /* Ocultar elementos de Streamlit */
+    [data-testid="stSidebar"], header, footer, [data-testid="stHeader"] {{
+        display: none !important;
+    }}
     </style>
     """, unsafe_allow_html=True)
 
-# 3. Header HTML Estático
-st.markdown("""
-    <div class="header-container">
+# 4. DIBUJAR NAVBAR (HTML Puro para que no haya errores de círculos)
+# Usamos botones de Streamlit camuflados para la navegación
+st.markdown(f"""
+    <div class="nav-wrapper">
         <div class="logo">FinanceLab</div>
-        <div class="signature">TOMAS TOKATLIAN / ANALYST</div>
+        <div class="nav-items">
+            </div>
+        <div class="signature-box">TOMAS TOKATLIAN / ANALYST</div>
     </div>
     """, unsafe_allow_html=True)
 
-# 4. El Radio (Navegación)
-# El CSS lo va a mover mágicamente adentro de la barra blanca
-opcion = st.radio(
-    "",
-    ["Intelligence", "Credit", "Carry"],
-    horizontal=True,
-    label_visibility="collapsed"
-)
+# Colocamos los botones de navegación físicamente arriba usando columnas
+# Esto reemplaza al radio button problemático
+c1, c2, c3, c4, c5, c6, c7 = st.columns([2, 1, 1, 1, 1, 1, 2])
+with c3:
+    if st.button("Intelligence", key="btn1", use_container_width=True):
+        st.session_state.choice = "Intelligence"
+with c4:
+    if st.button("Credit", key="btn2", use_container_width=True):
+        st.session_state.choice = "Credit"
+with c5:
+    if st.button("Carry", key="btn3", use_container_width=True):
+        st.session_state.choice = "Carry"
 
-# 5. Lógica de Datos
-def obtener_dolares():
-    try:
-        return requests.get("https://dolarapi.com/v1/dolares").json()
-    except:
-        return None
+# CSS Extra para que esos botones parezcan texto de Navbar
+st.markdown("""
+    <style>
+    div.stButton > button {
+        background: transparent !important;
+        border: none !important;
+        color: #0b1a14 !important;
+        font-family: 'Space Grotesk', sans-serif !important;
+        font-weight: 700 !important;
+        text-transform: uppercase !important;
+        font-size: 0.8rem !important;
+        margin-top: -120px !important; /* Los subimos a la Navbar */
+        position: relative;
+        z-index: 1001;
+    }
+    div.stButton > button:hover {
+        color: #c1ff72 !important;
+        background: #0b1a14 !important;
+    }
+    </style>
+    """, unsafe_allow_html=True)
 
-# 6. Renderizado de Contenido
+# 5. LÓGICA DE CONTENIDO
 st.markdown('<div class="main-content">', unsafe_allow_html=True)
+
+def obtener_dolares():
+    try: return requests.get("https://dolarapi.com/v1/dolares").json()
+    except: return None
+
+opcion = st.session_state.choice
 
 if opcion == "Intelligence":
     st.markdown("<h1>Market<br>Intelligence.</h1>", unsafe_allow_html=True)
     datos = obtener_dolares()
     if datos:
-        for i in range(0, len(datos), 3):
-            cols = st.columns(3)
-            grupo = datos[i:i+3]
-            for j, d in enumerate(grupo):
-                with cols[j]:
-                    st.markdown(f"""
-                        <div class="dolar-card">
-                            <div class="dolar-nombre">{d['nombre']}</div>
-                            <div style="display:flex; justify-content:space-between; margin-top:10px;">
-                                <div><small style="color:#8fa391">COMPRA</small><br><span class="price-val">${d['compra']:.0f}</span></div>
-                                <div><small style="color:#8fa391">VENTA</small><br><span class="price-val">${d['venta']:.0f}</span></div>
-                            </div>
+        cols = st.columns(3)
+        for i, d in enumerate(datos[:6]): # Mostramos los 6 principales
+            with cols[i % 3]:
+                st.markdown(f"""
+                    <div class="dolar-card">
+                        <p style="color:#8fa391; font-size:0.7rem; font-family:Space Grotesk;">{d['nombre']}</p>
+                        <div style="display:flex; justify-content:space-between;">
+                            <div><small style="color:#8fa391">COMPRA</small><br><span class="price-val">${d['compra']:.0f}</span></div>
+                            <div><small style="color:#8fa391">VENTA</small><br><span class="price-val">${d['venta']:.0f}</span></div>
                         </div>
-                    """, unsafe_allow_html=True)
-    else:
-        st.error("Error cargando datos.")
+                    </div>
+                """, unsafe_allow_html=True)
+                st.write("")
 
 elif opcion == "Credit":
     st.markdown("<h1>Unlock<br>Capital.</h1>", unsafe_allow_html=True)
@@ -181,15 +194,4 @@ elif opcion == "Credit":
         tasa = inf / 100
         va_total = sum([valor_cuota / ((1 + tasa) ** t) for t in range(1, cuotas + 1)])
         st.write("### Análisis de Eficiencia")
-        st.markdown(f"<h2 style='color:#c1ff72; font-size:3.5rem;'>PV: ${va_total:,.2f}</h2>", unsafe_allow_html=True)
-        if va_total < p_contado:
-            st.success(f"Estrategia: Financiar. Ahorro: ${p_contado - va_total:,.2f}")
-        else:
-            st.error("Estrategia: Contado.")
-
-elif opcion == "Carry":
-    st.markdown("<h1>Arbitrage<br>Strategy.</h1>", unsafe_allow_html=True)
-    st.info("Simulador de Carry Trade activo.")
-    # (Aquí podés pegar la lógica de Carry que ya tenías)
-
-st.markdown('</div>', unsafe_allow_html=True)
+        st.markdown
