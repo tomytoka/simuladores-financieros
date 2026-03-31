@@ -23,11 +23,27 @@ datos_dolar = obtener_dolares()
 # --- SECCIÓN 1: COTIZACIONES ---
 if opcion == "Cotizaciones en Tiempo Real":
     st.header("💵 Cotizaciones Actuales (Argentina)")
+    st.write("Datos en tiempo real extraídos de DolarApi.")
+
     if datos_dolar:
-        cols = st.columns(len(datos_dolar))
-        for i, d in enumerate(datos_dolar):
-            with cols[i % 3]: # Organiza en columnas
-                st.metric(label=d['nombre'], value=f"${d['venta']}", delta=f"Compra: ${d['compra']}")
+        # Creamos filas de a 3 columnas para que no se amontonen
+        for i in range(0, len(datos_dolar), 3):
+            cols = st.columns(3)
+            # Agarramos un grupo de 3 dólares
+            grupo = datos_dolar[i:i+3]
+            
+            for j, d in enumerate(grupo):
+                with cols[j]:
+                    # Formateamos el precio para que se vea limpio
+                    precio_vta = f"${d['venta']:,.2f}"
+                    precio_compra = f"Compra: ${d['compra']:,.0f}"
+                    
+                    st.metric(
+                        label=d['nombre'], 
+                        value=precio_vta, 
+                        delta=precio_compra,
+                        delta_color="normal" # Esto lo pone en verde/gris según el valor
+                    )
     else:
         st.error("No se pudieron cargar los datos. Reintentá en unos minutos.")
 
