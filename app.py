@@ -7,60 +7,61 @@ st.set_page_config(page_title="My Finance Lab", page_icon="📊", layout="wide")
 # --- CSS AVANZADO: Fondo con Gradientes y Tarjetas Modernas ---
 st.markdown("""
     <style>
-    /* 1. Fondo con gradientes suaves (blobs) */
-    .stApp {
-        background-color: #0a0b10;
-        background-image: 
-            radial-gradient(at 10% 10%, #00a8e8 0px, transparent 50%),
-            radial-gradient(at 90% 90%, #ff6b6b 0px, transparent 50%);
-        background-size: 100% 100%;
-        background-attachment: fixed;
+    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&display=swap');
+
+    /* 1. Reset General */
+    html, body, [class*="css"]  {
+        font-family: 'Inter', sans-serif;
     }
 
-    /* 2. Tarjetas de métricas (Dólares, etc.) */
-    div[data-testid="metric-container"] {
-        background-color: rgba(30, 33, 43, 0.7); /* Fondo translúcido */
+    /* 2. Fondo: Más oscuro y elegante */
+    .stApp {
+        background: #050505;
+        background-image: 
+            radial-gradient(circle at 20% 30%, rgba(0, 168, 232, 0.05) 0%, transparent 40%),
+            radial-gradient(circle at 80% 70%, rgba(50, 255, 126, 0.05) 0%, transparent 40%);
+    }
+
+    /* 3. Títulos Gradientes */
+    h1 {
+        font-weight: 800 !important;
+        background: linear-gradient(90deg, #FFFFFF, #888888);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        letter-spacing: -1px;
+    }
+
+    /* 4. TARJETAS (Métricas) - Look Pro */
+    div[data-testid="stMetric"] {
+        background: rgba(255, 255, 255, 0.03);
         border: 1px solid rgba(255, 255, 255, 0.1);
-        padding: 25px;
-        border-radius: 16px;
-        box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3); /* Sombras profundas */
-        backdrop-filter: blur(10px); /* Efecto de vidrio esmerilado */
+        padding: 20px !important;
+        border-radius: 20px;
+        transition: all 0.3s ease;
     }
     
-    /* 3. Color del título de la métrica (label) */
-    [data-testid="stMetricLabel"] {
-        color: #8a8d97 !important;
-        font-weight: 500;
+    div[data-testid="stMetric"]:hover {
+        background: rgba(255, 255, 255, 0.05);
+        border: 1px solid rgba(50, 255, 126, 0.3);
+        transform: translateY(-5px);
+    }
+
+    /* 5. Ajuste de textos en métricas */
+    label[data-testid="stMetricLabel"] p {
+        font-size: 0.9rem !important;
+        color: #888888 !important;
         text-transform: uppercase;
         letter-spacing: 1px;
     }
-    
-    /* 4. Color y tamaño del valor principal */
-    [data-testid="stMetricValue"] {
-        color: #32ff7e !important;
-        font-size: 32px;
-        font-weight: 700;
-    }
 
-    /* 5. Títulos principales con gradiente de texto */
-    h1 {
-        background: linear-gradient(90deg, #32ff7e, #00a8e8);
-        -webkit-background-clip: text;
-        -webkit-text-fill-color: transparent;
-        font-weight: 800;
-    }
-    
-    /* 6. Barra lateral */
-    .stSidebar {
-        background-color: #0a0b10 !important;
-        border-right: 1px solid rgba(255, 255, 255, 0.05);
+    div[data-testid="stMetricValue"] div {
+        font-size: 1.8rem !important;
+        font-weight: 700 !important;
+        color: #32ff7e !important;
     }
     </style>
     """, unsafe_allow_html=True)
 
-# Título de tu sitio (Personalizalo)
-st.title("My Finance Lab")
-st.write("Simuladores y herramientas para análisis financiero personal.")
 # Configuración de página (NOMBRE DE TU PROYECTO)
 st.set_page_config(page_title="Herramientas Finanieras", page_icon="📊", layout="wide")
 
@@ -84,13 +85,28 @@ st.title("Herramientas Financieras")
 st.write("Herramientas interactivas para análisis financiero y toma de decisiones.")
 
 # --- FUNCIÓN PARA OBTENER DÓLAR ---
-def obtener_dolares():
-    try:
-        url = "https://dolarapi.com/v1/dolares"
-        res = requests.get(url)
-        return res.json()
-    except:
-        return None
+if opcion == "Cotizaciones en Tiempo Real":
+    st.markdown("# Mercado de Cambios")
+    st.caption("Precios de referencia para la toma de decisiones financieras.")
+    st.write("---") # Una línea divisoria fina
+
+    if datos_dolar:
+        # Usamos contenedores para agrupar
+        with st.container():
+            for i in range(0, len(datos_dolar), 3):
+                cols = st.columns(3)
+                grupo = datos_dolar[i:i+3]
+                for j, d in enumerate(grupo):
+                    with cols[j]:
+                        st.metric(
+                            label=d['nombre'], 
+                            value=f"${d['venta']:,.0f}", 
+                            delta=f"Compra: ${d['compra']:,.0f}",
+                            delta_color="normal"
+                        )
+                st.write("") # Espacio entre filas
+    else:
+        st.error("Error al conectar con la API.")
 
 # --- MENÚ LATERAL ---
 st.sidebar.title("Navegación")
