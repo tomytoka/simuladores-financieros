@@ -1,8 +1,27 @@
 import streamlit as st
 import requests
 
-# Configuración de página
-st.set_page_config(page_title="UADE Finance Hub", page_icon="📈")
+# Configuración de página (NOMBRE DE TU PROYECTO)
+st.set_page_config(page_title="My Finance Lab", page_icon="📊", layout="wide")
+
+# Estilo personalizado para las tarjetas (CSS)
+st.markdown("""
+    <style>
+    div[data-testid="metric-container"] {
+        background-color: #1e212b;
+        border: 1px solid #323641;
+        padding: 20px;
+        border-radius: 12px;
+        box-shadow: 0 4px 10px rgba(0,0,0,0.3);
+    }
+    stMetric label {
+        color: #8a8d97 !important;
+    }
+    </style>
+    """, unsafe_allow_html=True)
+
+st.title("🚀 Finance Lab")
+st.write("Herramientas interactivas para análisis financiero y toma de decisiones.")
 
 # --- FUNCIÓN PARA OBTENER DÓLAR ---
 def obtener_dolares():
