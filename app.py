@@ -1,6 +1,66 @@
 import streamlit as st
 import requests
 
+# Configuración de página (Ponele layout="wide" para usar todo el espacio)
+st.set_page_config(page_title="My Finance Lab", page_icon="📊", layout="wide")
+
+# --- CSS AVANZADO: Fondo con Gradientes y Tarjetas Modernas ---
+st.markdown("""
+    <style>
+    /* 1. Fondo con gradientes suaves (blobs) */
+    .stApp {
+        background-color: #0a0b10;
+        background-image: 
+            radial-gradient(at 10% 10%, #00a8e8 0px, transparent 50%),
+            radial-gradient(at 90% 90%, #ff6b6b 0px, transparent 50%);
+        background-size: 100% 100%;
+        background-attachment: fixed;
+    }
+
+    /* 2. Tarjetas de métricas (Dólares, etc.) */
+    div[data-testid="metric-container"] {
+        background-color: rgba(30, 33, 43, 0.7); /* Fondo translúcido */
+        border: 1px solid rgba(255, 255, 255, 0.1);
+        padding: 25px;
+        border-radius: 16px;
+        box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3); /* Sombras profundas */
+        backdrop-filter: blur(10px); /* Efecto de vidrio esmerilado */
+    }
+    
+    /* 3. Color del título de la métrica (label) */
+    [data-testid="stMetricLabel"] {
+        color: #8a8d97 !important;
+        font-weight: 500;
+        text-transform: uppercase;
+        letter-spacing: 1px;
+    }
+    
+    /* 4. Color y tamaño del valor principal */
+    [data-testid="stMetricValue"] {
+        color: #32ff7e !important;
+        font-size: 32px;
+        font-weight: 700;
+    }
+
+    /* 5. Títulos principales con gradiente de texto */
+    h1 {
+        background: linear-gradient(90deg, #32ff7e, #00a8e8);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        font-weight: 800;
+    }
+    
+    /* 6. Barra lateral */
+    .stSidebar {
+        background-color: #0a0b10 !important;
+        border-right: 1px solid rgba(255, 255, 255, 0.05);
+    }
+    </style>
+    """, unsafe_allow_html=True)
+
+# Título de tu sitio (Personalizalo)
+st.title("My Finance Lab")
+st.write("Simuladores y herramientas para análisis financiero personal.")
 # Configuración de página (NOMBRE DE TU PROYECTO)
 st.set_page_config(page_title="Herramientas Finanieras", page_icon="📊", layout="wide")
 
@@ -36,35 +96,29 @@ def obtener_dolares():
 st.sidebar.title("Navegación")
 opcion = st.sidebar.selectbox("Elegí un simulador", 
     ["Cotizaciones en Tiempo Real", "Cuotas vs Contado", "Carry Trade (Bicicleta)"])
-
+st.sidebar.divider()
+st.sidebar.markdown("### **Desarrollado por Tomas Tokatlian**")
+st.sidebar.write("Estudiante de Lic. en Finanzas")
 datos_dolar = obtener_dolares()
 
 # --- SECCIÓN 1: COTIZACIONES ---
 if opcion == "Cotizaciones en Tiempo Real":
-    st.header("Cotizacion Dolar")
+    st.header("💵 Cotizaciones Actuales (Argentina)")
     st.write("Datos en tiempo real extraídos de DolarApi.")
 
     if datos_dolar:
-        # Creamos filas de a 3 columnas para que no se amontonen
+        # Creamos una grilla de 3 columnas
         for i in range(0, len(datos_dolar), 3):
             cols = st.columns(3)
-            # Agarramos un grupo de 3 dólares
             grupo = datos_dolar[i:i+3]
-            
             for j, d in enumerate(grupo):
                 with cols[j]:
-                    # Formateamos el precio para que se vea limpio
-                    precio_vta = f"${d['venta']:,.2f}"
-                    precio_compra = f"Compra: ${d['compra']:,.0f}"
-                    
                     st.metric(
                         label=d['nombre'], 
-                        value=precio_vta, 
-                        delta=precio_compra,
-                        delta_color="normal" # Esto lo pone en verde/gris según el valor
+                        value=f"${d['venta']:,.2f}", 
+                        delta=f"Compra: ${d['compra']:,.0f}",
+                        delta_color="normal"
                     )
-    else:
-        st.error("No se pudieron cargar los datos. Reintentá en unos minutos.")
 
 # --- SECCIÓN 2: CUOTAS VS CONTADO ---
 elif opcion == "Cuotas vs Contado":
